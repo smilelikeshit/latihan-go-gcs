@@ -56,7 +56,19 @@ func (g *gcs) ListFile() {
 
 }
 
-func (g *gcs) RenameFile() error {
+func (g *gcs) RoleFilePublic(filename string) {
+
+	acl := g.clientgcs.Bucket(g.bucketname).Object(filename).ACL()
+	if err := acl.Set(context.Background(), storage.AllUsers, storage.RoleReader); err != nil {
+		fmt.Println(err)
+
+	}
+
+	fmt.Printf("bucketname %s , filename %s has successfully to public ACL", g.bucketname, filename)
+
+}
+
+func (g *gcs) RenameFile() string {
 
 	ctx := context.Background()
 
@@ -65,13 +77,13 @@ func (g *gcs) RenameFile() error {
 	dst := g.clientgcs.Bucket(g.bucketname).Object(dstName)
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstName, g.filename, err)
+		return dstName
 	}
 	if err := src.Delete(ctx); err != nil {
-		return fmt.Errorf("Object(%q).Delete: %v", g.filename, err)
+		return dstName
 	}
 	fmt.Printf("Blob %v moved to %v.\n", g.filename, dstName)
 
-	return nil
+	return dstName
 
 }

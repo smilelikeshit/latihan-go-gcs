@@ -5,6 +5,7 @@ import (
 	"io"
 	"learning-gcs/gcs"
 	"os"
+	"time"
 )
 
 type City struct {
@@ -14,10 +15,15 @@ type City struct {
 
 func main() {
 
-	os.Setenv("BUCKET", "example")
-	os.Setenv("FILE_OBJECT", "city.json")
+	now := time.Now()
 
-	// create data from struct
+	// create file by date format
+	timeformat, _ := time.Parse(time.RFC822, "02 Jan 06 15:04 MST")
+
+	os.Setenv("BUCKET", "example")
+	os.Setenv("FILE_OBJECT", now.Format(timeformat.String()))
+
+	// dummy create data from struct implement io.Writer
 	c1 := City{"Bandung", "Jawa Barat"}
 
 	// create object from struct
@@ -29,9 +35,11 @@ func main() {
 	}
 	// list object from bucket
 	gc.ListFile()
-
 	// rename object from bucket
-	gc.RenameFile()
+	z := gc.RenameFile()
+
+	// set acl to public
+	gc.RoleFilePublic(z)
 
 }
 
